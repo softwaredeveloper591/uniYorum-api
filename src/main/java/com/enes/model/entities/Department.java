@@ -1,4 +1,4 @@
-package com.enes.entities;
+package com.enes.model.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,7 +33,6 @@ public class Department {
     private String bolumAd;
 
     @ManyToOne
-    @JoinColumn(name = "fakulte_id", nullable = false)
     private Faculty faculty;
 
     @Column(name = "status", nullable = false)

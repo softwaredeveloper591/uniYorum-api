@@ -1,4 +1,6 @@
-package com.enes.entities;
+package com.enes.model.entities;
+
+import com.enes.model.enums.Role;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
@@ -10,8 +12,10 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 
 @MappedSuperclass
@@ -20,7 +24,7 @@ import lombok.Setter;
 public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @NotBlank(message = "Username cannot be empty.")
     @Size(max = 45, message = "Username cannot exceed 45 characters.")

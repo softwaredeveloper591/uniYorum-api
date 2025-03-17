@@ -1,5 +1,4 @@
-package com.enes.entities;
-
+package com.enes.model.entities;
 
 import java.util.List;
 
