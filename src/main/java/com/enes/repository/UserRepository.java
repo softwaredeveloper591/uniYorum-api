@@ -3,17 +3,11 @@ package com.enes.repository;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
-import com.enes.model.User;
-
-import java.util.List;
+import com.enes.model.entities.User;
 
 
-@Repository
-public interface UserRepository extends JpaRepository<User, Long>{
+public interface UserRepository extends JpaRepository<User, Integer> {
+	 Optional<User> findByEmail(String email);
 
-//	@Query(value = "from User where username = :username")
-	Optional<User> findByUsername(String username);
 }

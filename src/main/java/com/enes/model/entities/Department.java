@@ -7,7 +7,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,13 +28,16 @@ public class Department {
     @Column(name = "department_id")
     private Integer departmentId;
 
-    @Column(name = "uni_id", nullable = false)
-    private Integer uniId;
+	@OneToOne
+	@JoinColumn(name = "uni_id", referencedColumnName = "uni_id")
+	@NotNull(message = "Uni Id can't be null")
+    private University university;
 
     @Column(name = "bolum_ad", length = 255, nullable = false)
     private String bolumAd;
 
     @ManyToOne
+    @JoinColumn(name = "fakulte_id", nullable = false)
     private Faculty faculty;
 
     @Column(name = "status", nullable = false)

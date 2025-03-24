@@ -2,11 +2,8 @@ package com.enes.jwt;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.enes.model.entities.User;
@@ -23,11 +20,11 @@ public class JwtService {
 	public static final String SECRET_KEY = "5N+6yAw9UJlZGIE3ivXxkQlxnb9BauSkvcdSJ447DQE=";
 
 	public String generateToken(User user) {
-		Map<String, Object> claimsMap   =  new HashMap<>();
-		claimsMap.put("role", "ROLE_"+user.getRole().name());
+//		Map<String, Object> claimsMap   =  new HashMap<>();
+//		claimsMap.put("role", "ROLE_"+user.getRole().name());
 		return Jwts.builder()
 		.setSubject(user.getEmail())
-		.addClaims(claimsMap)
+//		.addClaims(claimsMap)
 		.setIssuedAt(new Date())
 		.setExpiration(new Date(System.currentTimeMillis() + 1000*60*60*2))
 		.signWith(getKey(), SignatureAlgorithm.HS256)
@@ -39,6 +36,7 @@ public class JwtService {
 		Claims claims =  getClaims(token);
 		return claims.get(key);
 	}
+	
 	
 	
 	public  Claims getClaims(String token) {
@@ -59,9 +57,13 @@ public class JwtService {
 		return exportToken(token, Claims::getSubject);
 	}
 	
+	public Date getExpirationDate(String token) {
+		return exportToken(token, Claims::getExpiration);
+	}
+	
 	
 	public boolean isTokenExpired(String token) {
-		Date expiredDate= exportToken(token, Claims::getExpiration);
+		Date expiredDate= getExpirationDate(token);
 		return new Date().after(expiredDate);
 	}
 	

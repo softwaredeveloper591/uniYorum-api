@@ -1,5 +1,9 @@
 package com.enes.model.entities;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -41,7 +45,8 @@ public class StudentFile {
 	private String mimeType;
 	
 	@NotNull
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)  
+    @OnDelete(action = OnDeleteAction.CASCADE) 
 	@JoinColumn(name = "studentId")
 	private Student student;
 

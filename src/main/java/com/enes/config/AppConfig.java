@@ -2,7 +2,6 @@ package com.enes.config;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -12,19 +11,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.enes.model.entities.Admin;
-import com.enes.model.entities.Student;
-import com.enes.repository.AdminRepository;
-import com.enes.repository.StudentRepository;
+import com.enes.model.entities.User;
+import com.enes.repository.UserRepository;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Configuration
 public class AppConfig {
 	
-	@Autowired
-	private StudentRepository studentRepository;
-	
-	@Autowired
-	private AdminRepository adminRepository;
+	private final UserRepository userRepository;
 	
 	
 
@@ -34,13 +30,9 @@ public class AppConfig {
 			
 			@Override
 			public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-			 Optional<Student> optionalStudent = 	studentRepository.findByEmail(email);
-			 if(optionalStudent.isPresent()) {
-				 return optionalStudent.get();
-			 }
-			 Optional<Admin> optionalAdmin = 	adminRepository.findByEmail(email);
-			 if(optionalAdmin.isPresent()) {
-				 return optionalAdmin.get();
+			 Optional<User> optionalUser = 	userRepository.findByEmail(email);
+			 if(optionalUser.isPresent()) {
+				 return optionalUser.get();
 			 }
 			 throw new UsernameNotFoundException("User not found: " + email);
 			}

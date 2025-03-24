@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan(basePackages = {"com.enes"})
 @EntityScan(basePackages = {"com.enes"})
 @EnableJpaRepositories(basePackages = {"com.enes"})
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.enes")
 public class UniyorumApiApplication {
 
 	public static void main(String[] args) {
