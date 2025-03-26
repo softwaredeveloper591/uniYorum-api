@@ -32,6 +32,7 @@ public class AppConfig {
 			public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 			 Optional<User> optionalUser = 	userRepository.findByEmail(email);
 			 if(optionalUser.isPresent()) {
+				 System.out.print(optionalUser.get().getUsername());
 				 return optionalUser.get();
 			 }
 			 throw new UsernameNotFoundException("User not found: " + email);

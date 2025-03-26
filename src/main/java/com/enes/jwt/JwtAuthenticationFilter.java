@@ -1,6 +1,7 @@
 package com.enes.jwt;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,23 +13,24 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.enes.exception.BaseException;
+import com.enes.model.entities.Token;
+import com.enes.repository.TokenRepository;
+
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	
-	 private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-
-	 
-	@Autowired
-	private JwtService jwtService;
-
-	@Autowired
-	private UserDetailsService userDetailsService;
+	private final JwtService jwtService;
+	private final UserDetailsService userDetailsService;
+	private final TokenRepository tokenRepository;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -37,13 +39,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String token;
 		String username;
 		
-		String requestUri = request.getRequestURI();
-        logger.info("Incoming request to: {}", requestUri);
-
 		header = request.getHeader("Authorization");
 
 		if (header == null || !header.startsWith("Bearer ")) {
-			logger.info("authentication for {}", requestUri);
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -52,7 +50,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			username = jwtService.getUsernameByToken(token);
 			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-				if (userDetails != null && !jwtService.isTokenExpired(token)) {
+				Optional<Token> optToken = tokenRepository.findByToken(token);
+				boolean isRevoked=false;
+				if(optToken.isPresent() || optToken.get().isRevoked()) isRevoked=true; // token must not be revoked in db
+				if (userDetails != null && !jwtService.isTokenExpired(token) && !isRevoked) {
 					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
 							username, null, userDetails.getAuthorities());
 					authentication.setDetails(userDetails);

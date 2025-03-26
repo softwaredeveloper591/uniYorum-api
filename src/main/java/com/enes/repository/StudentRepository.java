@@ -8,7 +8,5 @@ import com.enes.model.entities.Student;
 
 
 public interface StudentRepository extends JpaRepository<Student, Integer> {
-	
-	Optional<Student> findByEmail(String email);
 
 }

@@ -12,6 +12,7 @@ import com.enes.model.enums.Role;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -33,13 +34,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Entity
 public class User implements UserDetails {
 	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank(message = "Username cannot be empty.")
     @Size(max = 45, message = "Username cannot exceed 45 characters.")
     @Column(name = "username", length = 45, nullable = false)
     private String username;
@@ -50,7 +51,7 @@ public class User implements UserDetails {
     private String email;
 
     @Size(max = 250, message = "Password cannot exceed 250 characters.")
-    @Column(length = 250, nullable = false)
+    @Column(length = 250, nullable = false, unique = true)
     private String password;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL) //we use field name for mapped by but for join column name we use database column name
@@ -62,7 +63,8 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.getRole().name()));
+    	System.out.print(this.getRole().name());
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_"+this.getRole().name()));
     }
 
     

@@ -27,8 +27,6 @@ public class SecurityConfig {
 	@Autowired
 	private AuthenticationProvider authenticationProvider;
 	
-	public static final String[] PUBLIC_ENDPOINTS = { "/admin", "/register" };
-	
 	@Autowired
 	private JwtAuthenticationFilter jwtAuthenticationFilter;
 	
@@ -37,8 +35,10 @@ public class SecurityConfig {
 		
         http.csrf(csrf -> csrf.disable())  
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers(HttpMethod.GET, "/admin1").hasRole(Role.STUDENT.name())
-                                .anyRequest().permitAll())
+                        request.requestMatchers(HttpMethod.GET, "/admin").hasRole("ADMIN")
+                        
+                        		.requestMatchers(HttpMethod.POST,"/login").permitAll()
+                                .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

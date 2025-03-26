@@ -34,14 +34,15 @@ public class Student  {
 	
 	@OneToOne
 	@NotNull(message = "University ID cannot be null.")
-    @Column(name = "uni_id", nullable = false)
-    private University university; // Changed to Long to match Java conventions
+	@JoinColumn(name = "uni_id",referencedColumnName = "uni_id")
+    private University university; 
 
 	@OneToOne
 	@JoinColumn(name = "department_id", referencedColumnName = "department_id")
 	@NotNull(message = "Department ID cannot be null.")
     private Department department;
 
+	@Builder.Default
     @Column(nullable = false)
     private Boolean approved=false;
 

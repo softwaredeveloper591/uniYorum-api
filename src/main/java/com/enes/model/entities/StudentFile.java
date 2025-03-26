@@ -47,7 +47,7 @@ public class StudentFile {
 	@NotNull
 	@OneToOne(cascade = CascadeType.ALL)  
     @OnDelete(action = OnDeleteAction.CASCADE) 
-	@JoinColumn(name = "studentId")
+	@JoinColumn(name = "student_id", referencedColumnName = "id")
 	private Student student;
 
 }

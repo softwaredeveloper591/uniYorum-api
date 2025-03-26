@@ -45,8 +45,7 @@ public class AuthenticationController {
 	}
 	
 	@GetMapping("/admin")
-	public String getMethodName(@RequestParam String param) {
-		String encode = byBCryptPasswordEncoder.encode("admin_admin");
-		return encode;
+	public String getMethodName() {
+		return "here";
 	}
 }

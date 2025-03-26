@@ -2,6 +2,8 @@ package com.enes.jwt;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.stereotype.Component;
@@ -20,11 +22,11 @@ public class JwtService {
 	public static final String SECRET_KEY = "5N+6yAw9UJlZGIE3ivXxkQlxnb9BauSkvcdSJ447DQE=";
 
 	public String generateToken(User user) {
-//		Map<String, Object> claimsMap   =  new HashMap<>();
-//		claimsMap.put("role", "ROLE_"+user.getRole().name());
+		Map<String, Object> claimsMap   =  new HashMap<>();
+		claimsMap.put("role", "ROLE_"+user.getRole().name());
 		return Jwts.builder()
 		.setSubject(user.getEmail())
-//		.addClaims(claimsMap)
+		.addClaims(claimsMap)
 		.setIssuedAt(new Date())
 		.setExpiration(new Date(System.currentTimeMillis() + 1000*60*60*2))
 		.signWith(getKey(), SignatureAlgorithm.HS256)

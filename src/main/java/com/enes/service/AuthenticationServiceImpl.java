@@ -3,9 +3,11 @@ package com.enes.service;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.hibernate.internal.build.AllowSysOut;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,6 +36,7 @@ import com.enes.repository.TokenRepository;
 import com.enes.repository.UniversityRepository;
 import com.enes.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -59,6 +62,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService  {
 		return new StudentResponseDto(save.getUser().getId(),save.getUser().getUsername(), save.getUser().getEmail());
 	}
 	
+	@Transactional
 	public String login(AuthRequest loginRequest) {
 		UsernamePasswordAuthenticationToken authenticationToken= new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password());
 		authenticationProvider.authenticate(authenticationToken);
@@ -66,15 +70,35 @@ public class AuthenticationServiceImpl implements IAuthenticationService  {
 		if(optUser.isEmpty()){
 			throw new BaseException(new ErrorMessage(null, MessageType.USERNAME_OR_PASSWORD_INVALID));
 		}
-		String token =jwtService.generateToken(optUser.get());
+		User user= optUser.get();
+		tokenRepository.deleteExpiredTokens();
+		List<Token> allValidTokensByUserToken = tokenRepository.findAllValidTokensByUserToken(user.getId());
+		allValidTokensByUserToken.forEach(t->{
+			System.out.println(t.getToken());
+			if (t.getId()==2 || t.getId()==3) {
+				t.setRevoked(true);
+				tokenRepository.save(t);
+			}
+		});
+		String token =jwtService.generateToken(user);
 		Date expiryDate= jwtService.getExpirationDate(token);
+		revokeAllUserTokens(user);
 		Token newToken = Token.builder()
 		.token(token)
 		.expiryDate(expiryDate)
-		.user(optUser.get())
+		.user(user)
 		.build();
 		tokenRepository.save(newToken);
 		return token;
+	}
+	
+	private void revokeAllUserTokens(User user) {
+		List<Token> allValidTokensByUserToken = tokenRepository.findAllValidTokensByUserToken(user.getId());
+		if (allValidTokensByUserToken.isEmpty()) return;
+		allValidTokensByUserToken.forEach(t->{
+			t.setRevoked(true);
+		});
+		tokenRepository.saveAll(allValidTokensByUserToken);
 	}
 	
 	private StudentFile processFile(MultipartFile file, Student student){
@@ -101,6 +125,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService  {
 	}
 	
 	private Student createStudent(RegisterRequest data) {
+		Optional<User> optUser = userRepository.findByEmail(data.getEmail());
+		if(optUser.isPresent()) {
+			throw new BaseException(new ErrorMessage("User Already Exist.", MessageType.NOT_ACCEPTABLE_REQUEST));
+		}
 		User newUser = User.builder()
 		.username(data.getUsername())
 		.email(data.getEmail())
@@ -108,13 +136,15 @@ public class AuthenticationServiceImpl implements IAuthenticationService  {
 		.role(Role.STUDENT)
 		.build();
 		
+		User savedUser = userRepository.save(newUser);
+		
 		Optional<Department> optionalDepartment= departmentRepository.findById(data.getDepartmentId());
 		Optional<University> optionalUniversity= universityRepository.findById(data.getUniId());
 		if(optionalDepartment.isEmpty() || optionalUniversity.isEmpty()) {
 			throw new BaseException(new ErrorMessage("There is no Department or University with given Id",MessageType.NOT_ACCEPTABLE_REQUEST));
 		}
 		Student newStudent=Student.builder()
-		.user(newUser)
+		.user(savedUser)
 		.university(optionalUniversity.get())
 		.department(optionalDepartment.get())
 		.build();
